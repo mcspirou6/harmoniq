@@ -15,19 +15,19 @@ class ArtistCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap, // Lorsque l'artiste est cliqué
+      onTap: onTap,
       child: Card(
-        color: Colors.grey, // Fond gris pour chaque carte
+        color: Colors.grey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        elevation: 4, // Ombre légère
+        elevation: 4,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircleAvatar(
-              radius: 40, // Rayon du cercle pour la photo
+              radius: 40,
               backgroundImage: AssetImage(imagePath),
             ),
             const SizedBox(height: 8),

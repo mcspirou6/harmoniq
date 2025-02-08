@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -14,6 +15,98 @@ class _AuthPageState extends State<AuthPage> {
   final _passwordController = TextEditingController();
   final _usernameController = TextEditingController();
   bool _isLoading = false;
+  final _authService = AuthService();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await _authService.signInWithGoogle();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur de connexion Google: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleSignIn() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        await _authService.signIn(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erreur de connexion: $e')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  Future<void> _handleSignUp() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        await _authService.signUp(
+          email: _emailController.text,
+          password: _passwordController.text,
+          username: _usernameController.text,
+        );
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erreur d\'inscription: $e')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,19 +183,58 @@ class _AuthPageState extends State<AuthPage> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: _isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.deepPurple,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text(
-                          _isLogin ? 'Se connecter' : 'S\'inscrire',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
+                        onPressed: _isLoading ? null : _isLogin ? _handleSignIn : _handleSignUp,
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                _isLogin ? 'Se connecter' : 'S\'inscrire',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                      const SizedBox(height: 20),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          side: const BorderSide(color: Colors.grey),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: _isLoading ? null : _handleGoogleSignIn,
+                        icon: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Image.asset(
+                                'assets/google_logo.png',
+                                height: 24,
+                              ),
+                        label: Text(
+                          'Continuer avec Google',
+                          style: TextStyle(
+                            color: Colors.grey[800],
+                            fontSize: 16,
                           ),
                         ),
                       ),
@@ -126,38 +258,6 @@ class _AuthPageState extends State<AuthPage> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                // Connexion avec réseaux sociaux
-                const Text(
-                  'Ou se connecter avec',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildSocialButton(
-                      icon: Icons.g_mobiledata,
-                      onPressed: () {
-                        // Connexion avec Google
-                      },
-                    ),
-                    _buildSocialButton(
-                      icon: Icons.facebook,
-                      onPressed: () {
-                        // Connexion avec Facebook
-                      },
-                    ),
-                    _buildSocialButton(
-                      icon: Icons.apple,
-                      onPressed: () {
-                        // Connexion avec Apple
-                      },
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -194,72 +294,5 @@ class _AuthPageState extends State<AuthPage> {
       ),
       validator: validator,
     );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(
-        icon,
-        color: Colors.white,
-        size: 32,
-      ),
-      style: IconButton.styleFrom(
-        backgroundColor: Colors.grey[900],
-        padding: const EdgeInsets.all(12),
-      ),
-    );
-  }
-
-  void _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      try {
-        // Simuler un délai d'authentification
-        await Future.delayed(const Duration(seconds: 2));
-
-        // Ici, vous pouvez ajouter l'intégration avec un backend réel
-        // Pour l'instant, nous utilisons une validation simple
-        if (_emailController.text == 'test@example.com' &&
-            _passwordController.text == 'password123') {
-          if (mounted) {
-            Navigator.pushReplacementNamed(
-              context,
-              '/home',
-            );
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Email ou mot de passe incorrect'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
-    }
   }
 }

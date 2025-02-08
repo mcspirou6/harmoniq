@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "180555908233",
+    "project_id": "harmoniq-app",
+    "storage_bucket": "harmoniq-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180555908233:android:bacc2b7a0ea0dd230ab258",
+        "android_client_info": {
+          "package_name": "com.example.harmonix"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFUg19ZA9v5WvY5-qTp6WtFgQbIaajiO8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

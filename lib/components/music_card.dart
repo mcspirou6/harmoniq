@@ -24,7 +24,7 @@ class MusicCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(15), // Bord arrondi pour la forme carrée
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withAlpha(25),
               blurRadius: 8,
               spreadRadius: 2,
               offset: const Offset(0, 4),
